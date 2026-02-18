@@ -1,0 +1,37 @@
+# Nome que aparecerá na aba 'Actions' do seu GitHub
+name: Pipeline de CI - Stack WordPress & Monitoramento
+
+# Definição dos Gatilhos (Triggers)
+on:
+  push:
+    branches: [ "main" ] # Executa toda vez que você enviar código para a branch principal
+  pull_request:
+    branches: [ "main" ] # Executa quando alguém sugerir uma alteração via Pull Request
+
+jobs:
+  # Primeiro Job: Validação de Infraestrutura
+  validacao-infra:
+    # Sistema Operacional da VM que o GitHub vai ligar (Azure Infrastructure)
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1º Passo: Copia os arquivos do seu repositório para dentro da VM do GitHub
+      - name: "Passo 1: Baixando o código no Runner"
+        uses: actions/checkout@v4
+
+      # 2º Passo: O Docker Compose 'config' verifica se o YAML está bem formatado
+      # e se as imagens e volumes possuem nomes válidos.
+      - name: "Passo 2: Validando sintaxe do Docker Compose"
+        run: docker compose config
+
+      # 3º Passo: Validação Profissional de Observabilidade.
+      # Montamos sua pasta 'monitoring' dentro de um container temporário do Prometheus
+      # para usar o 'promtool', que checa se o prometheus.yml e as regras de alerta estão corretas.
+      - name: "Passo 3: Validando Configurações e Alertas do Prometheus"
+        run: |
+          docker run --rm -v $(pwd)/monitoring:/etc/prometheus \
+          prom/prometheus:latest promtool check config /etc/prometheus/prometheus.yml
+
+      # Passo Bônus (Opcional): Apenas para confirmar que tudo passou
+      - name: "Finalização"
+        run: echo "Infraestrutura validada com sucesso! Pronto para o próximo passo."
