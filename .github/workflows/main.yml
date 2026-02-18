@@ -30,7 +30,8 @@ jobs:
       - name: "Passo 3: Validando Configurações e Alertas do Prometheus"
         run: |
           docker run --rm -v $(pwd)/monitoring:/etc/prometheus \
-          prom/prometheus:latest promtool check config /etc/prometheus/prometheus.yml
+          --entrypoint promtool \
+          prom/prometheus:latest check config /etc/prometheus/prometheus.yml
 
       # Passo Bônus (Opcional): Apenas para confirmar que tudo passou
       - name: "Finalização"
