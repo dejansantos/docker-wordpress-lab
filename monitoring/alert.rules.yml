@@ -1,0 +1,11 @@
+groups:
+  - name: mysql-alerts
+    rules:
+      - alert: MySQLDown
+        expr: mysql_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MySQL está fora do ar"
+          description: "O exporter não consegue acessar o MySQL há mais de 1 minuto."
